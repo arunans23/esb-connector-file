@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.connector.operations;
 
-import org.apache.axiom.om.OMAttribute;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs2.FileFilter;
@@ -53,7 +55,7 @@ import java.util.Arrays;
  * Implements File listing capability
  * in a directory.
  */
-public class ListFiles extends AbstractConnector {
+public class ListFiles extends AbstractFileConnectorOperation {
 
     private static final String MATCHING_PATTERN = "matchingPattern";
     private static final String RECURSIVE_PARAM = "recursive";
@@ -76,7 +78,8 @@ public class ListFiles extends AbstractConnector {
     private static final String ERROR_MESSAGE = "Error while performing file:listFiles for folder ";
 
     @Override
-    public void connect(MessageContext messageContext) throws ConnectException {
+    public void execute(MessageContext messageContext, String responseVariable,
+                        Boolean overwriteBody) throws ConnectException {
 
         String folderPath = null;
         String fileMatchingPattern;
@@ -145,7 +148,8 @@ public class ListFiles extends AbstractConnector {
                                 OPERATION_NAME,
                                 true,
                                 fileListEle);
-                        Utils.setResultAsPayload(messageContext, result);
+                        JsonObject resultJSON = generateOperationResult(messageContext, result);
+                        handleConnectorResponse(messageContext, responseVariable, overwriteBody, resultJSON, null, null);
                         successOperation = true;
                     } else {
                         throw new FileOperationException("Folder is expected.");
